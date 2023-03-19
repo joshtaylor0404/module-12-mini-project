@@ -16,6 +16,7 @@ const db = mysql.createConnection({
     database: 'movies_db'
 });
 
+// movies api ('api/movies')
 app.get('/api/movies', (req, res) => {
     const sql = `SELECT id, movie_name AS title FROM movies`;
 
@@ -27,6 +28,29 @@ app.get('/api/movies', (req, res) => {
 
         res.status(200).json({ message: 'success', data: rows });
     });
+});
+
+app.post('/api/movies', (req, res) => {
+    const { body } = req;
+
+    const sql = `INSERT INTO movies (movie_name)
+        VALUES (?)`
+    const params = [body.movie_name];
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            res.status(500).json({ error: err.message });
+            return;
+        }
+
+        res.status(200).json({
+            message: 'success',
+            data: {
+                id: result.insertId,
+                ...body
+            }
+        });
+    })
 });
 
 app.use((req, res) => {
